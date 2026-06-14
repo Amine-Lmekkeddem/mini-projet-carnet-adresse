@@ -6,8 +6,8 @@ class Contact:
     def __init__(self, nom, email, telephone):
 
         # Validation du nom
-        assert isinstance(nom, str) and nom.strip() != "", \
-            "Le nom doit être non vide"
+        assert nom.strip() != "", \
+            "Le nom ne peut pas être vide"
 
         # Validation email
         assert re.match(
@@ -28,5 +28,5 @@ class Contact:
         return (
             f"Nom : {self.nom}\n"
             f"Email : {self.email}\n"
-            f"Téléphone : {self.telephone}"
+            f"Téléphone : {self.telephone}\n"
         )
