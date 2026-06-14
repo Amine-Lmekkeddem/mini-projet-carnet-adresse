@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'edit' %}Modifier{% else %}Nouveau contact{% endif %} — address_book{% endblock %}
+
+{% block extra_style %}
+.form-wrap { max-width: 480px; }
+.form-header { margin-bottom: 1.8rem; }
+.form-header .back {
+  font-family: var(--mono);
+  font-size: .75rem;
+  color: var(--muted);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-bottom: .8rem;
+}
+.form-header .back:hover { color: var(--accent); }
+.form-header h1 {
+  font-family: var(--mono);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.error-list {
+  background: #fff0f3;
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  padding: .7rem 1rem;
+  margin-bottom: 1.2rem;
+}
+.error-list li {
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: #9b1c1c;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.form-actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
+{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+  <div class="form-header">
+    <a href="{{ url_for('index') }}" class="back">← retour</a>
+    <h1>{% if mode == 'edit' %}~ modifier le contact{% else %}+ nouveau contact{% endif %}</h1>
+  </div>
+
+  <div class="card">
+    {% if errors %}
+      <ul class="error-list">
+        {% for e in errors %}
+          <li>✕ {{ e }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <form method="POST">
+      <div class="field">
+        <label>nom</label>
+        <input type="text" name="nom" value="{{ nom }}" autofocus required />
+      </div>
+      <div class="field">
+        <label>email</label>
+        <input type="email" name="email" value="{{ email }}" required />
+      </div>
+      <div class="field">
+        <label>téléphone (10 chiffres)</label>
+        <input type="text" name="telephone" value="{{ telephone }}" maxlength="10" required />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          {% if mode == 'edit' %}→ enregistrer{% else %}→ ajouter{% endif %}
+        </button>
+        <a href="{{ url_for('index') }}" class="btn btn-muted">annuler</a>
+      </div>
+    </form>
+  </div>
+
+  {% if mode == 'edit' and contact %}
+    <div style="margin-top:1rem; font-family:var(--mono); font-size:.72rem; color:var(--muted);">
+      ajouté le {{ contact.date_ajout }}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
