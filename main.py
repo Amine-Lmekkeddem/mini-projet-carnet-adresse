@@ -3,9 +3,11 @@ import re
 
 
 def menu():
+
     carnet = AddressBook()
 
     while True:
+
         print("\n=== Carnet d'adresse ===")
         print("1. Ajouter un contact")
         print("2. Afficher les contacts")
@@ -14,36 +16,47 @@ def menu():
 
         choix = input("Choisissez une option : ")
 
+        # Ajouter
         if choix == "1":
 
-            # Validation du nom
+            # Nom
             while True:
-                nom = input("Nom : ")
-                if isinstance(nom, str) and nom.strip() != "":
+
+                nom = input("Nom : ").strip()
+
+                if nom != "":
                     break
-                print("Le nom doit être une chaîne non vide.")
 
-            # Validation de l'email
+                print("Le nom est obligatoire.")
+
+            # Email
             while True:
-                email = input("Email : ")
 
-                if isinstance(email, str) and re.match(
+                email = input("Email : ").strip()
+
+                if re.match(
                     r'^[\w\.-]+@[\w\.-]+\.\w+$',
                     email
                 ):
                     break
 
-                print("Email invalide. Veuillez réessayer.")
+                print("Email invalide.")
 
-            # Validation du téléphone
+            # Téléphone
             while True:
-                telephone = input("Téléphone : ")
 
-                if telephone.isdigit() and len(telephone) == 10:
+                telephone = input(
+                    "Téléphone (10 chiffres) : "
+                ).strip()
+
+                if (
+                    telephone.isdigit()
+                    and len(telephone) == 10
+                ):
                     break
 
                 print(
-                    "Le téléphone doit contenir uniquement 10 chiffres."
+                    "Le téléphone doit contenir 10 chiffres."
                 )
 
             carnet.ajouter_contact(
@@ -52,20 +65,39 @@ def menu():
                 telephone
             )
 
+        # Afficher
         elif choix == "2":
+
             carnet.afficher_contacts()
 
+        # Supprimer
         elif choix == "3":
-            nom = input("Nom à supprimer : ")
-            carnet.supprimer_contact(nom)
 
+            identifiant = input(
+                "Email ou téléphone : "
+            ).strip()
+
+            if identifiant != "":
+
+                carnet.supprimer_contact(
+                    identifiant
+                )
+
+            else:
+
+                print("Valeur invalide.")
+
+        # Quitter
         elif choix == "4":
+
             print("Au revoir !")
             break
 
         else:
+
             print("Choix invalide.")
 
 
 if __name__ == "__main__":
+
     menu()
