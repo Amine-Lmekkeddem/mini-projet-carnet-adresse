@@ -1,16 +1,15 @@
 import re
 
-
 class Contact:
 
     def __init__(self, nom, email, telephone):
 
         # Validation du nom
-        assert nom.strip() != "", \
-            "Le nom ne peut pas être vide"
+        assert isinstance(nom, str) and nom.strip() != "", \
+            "Le nom doit être une chaîne non vide"
 
         # Validation email
-        assert re.match(
+        assert isinstance(email, str) and re.match(
             r'^[\w\.-]+@[\w\.-]+\.\w+$',
             email
         ), "Email invalide"
