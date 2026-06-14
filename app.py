@@ -4,6 +4,10 @@ Fonctionnalités : login, CRUD contacts, recherche, CSV import/export, gestion a
 Base de données : SQLite3 (contacts.db)
 """
 
+from dotenv import load_dotenv
+load_dotenv()
+
+
 from flask import (
     Flask, render_template, request, redirect,
     url_for, session, flash, send_file, jsonify
@@ -22,7 +26,7 @@ from contextlib import contextmanager
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(32)
+app.secret_key = os.getenv("SECRET_KEY", secrets.token_hex(32))
 
 # Jinja filter to decode URL-encoded strings in templates
 app.jinja_env.filters['urldecode'] = urllib.parse.unquote
@@ -403,17 +407,11 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-#SMTP
-SMTP_HOST     = "smtp.gmail.com"          # smtp.office365.com for Outlook
-SMTP_PORT     = 587                       # 587=STARTTLS | 465=SSL
-SMTP_USER     = "aababou19@gmail.com"   # ← your sender email
-SMTP_PASSWORD = "ufoj hvvn nger mdzg"     # ← your Gmail App Password
-SMTP_NAME     = "AHMED AMIN Contacts"         # display name for recipients
-
-#WHATSAPP
-TWILIO_ACCOUNT_SID = "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # from twilio.com/console
-TWILIO_AUTH_TOKEN  = "your_auth_token_here"               # from twilio.com/console
-TWILIO_WA_FROM     = "whatsapp:+14155238886"              # sandbox number
+SMTP_HOST = os.getenv("SMTP_HOST")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+SMTP_NAME = os.getenv("SMTP_NAME")
 
 # ── Message templates ────────────────────────────────────────────────────
 
