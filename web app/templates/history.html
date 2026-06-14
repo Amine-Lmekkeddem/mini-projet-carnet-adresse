@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Historique — {{ contact.nom }}{% endblock %}
+
+{% block extra_style %}
+.back-link {
+  font-family: var(--mono); font-size: .78rem; color: var(--muted);
+  text-decoration: none; display: inline-flex; align-items: center; gap: .3rem;
+  margin-bottom: 1rem;
+}
+.back-link:hover { color: var(--accent); }
+.page-title { font-family: var(--mono); font-size: 1.2rem; font-weight: 500; margin-bottom: 1.5rem; }
+.page-title span { color: var(--accent); }
+
+.msg-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: .75rem;
+  overflow: hidden;
+}
+.msg-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .7rem 1rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.msg-type {
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 500;
+  padding: .15rem .6rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.msg-type.email    { background: #ede8fa; color: var(--accent3); }
+.msg-type.whatsapp { background: #f0fdf4; color: #15803d; }
+.msg-subject { font-family: var(--mono); font-size: .85rem; font-weight: 500; color: var(--text); }
+.msg-date    { font-family: var(--mono); font-size: .72rem; color: var(--muted); margin-left: auto; }
+.msg-body {
+  font-family: var(--mono);
+  font-size: .82rem;
+  color: var(--text);
+  padding: 1rem;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.empty-state {
+  text-align: center; padding: 3rem; font-family: var(--mono);
+  font-size: .85rem; color: var(--muted);
+}
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('communicate', contact_id=contact.id) }}" class="back-link">← retour</a>
+
+<div class="page-title">
+  🕑 Historique — <span>{{ contact.nom }}</span>
+</div>
+
+{% if messages %}
+  {% for m in messages %}
+    <div class="msg-card">
+      <div class="msg-card-header">
+        <span class="msg-type {{ m.type }}">
+          {% if m.type == 'email' %}✉ Email{% else %}💬 WhatsApp{% endif %}
+        </span>
+        <span class="msg-subject">{{ m.subject or '(sans objet)' }}</span>
+        <span class="msg-date">{{ m.sent_at }}</span>
+      </div>
+      <div class="msg-body">{{ m.body }}</div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="empty-state">
+    Aucun message envoyé à ce contact pour le moment.
+  </div>
+{% endif %}
+{% endblock %}
