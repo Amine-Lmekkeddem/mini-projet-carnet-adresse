@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% block title %}Contacts — address_book{% endblock %}
+
+{% block extra_style %}
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.page-title {
+  font-family: var(--mono);
+}
+.page-title .sub { font-size: .78rem; color: var(--muted); margin-bottom: .2rem; }
+.page-title h1  { font-size: 1.5rem; font-weight: 500; color: var(--text); letter-spacing: -.5px; }
+.page-title .counter { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+
+/* search bar */
+.search-row {
+  display: flex;
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+.search-wrap {
+  position: relative;
+  flex: 1;
+}
+.search-wrap .icon {
+  position: absolute;
+  left: .8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 1rem;
+  pointer-events: none;
+}
+.search-wrap input {
+  padding-left: 2.2rem;
+  padding-right: 2.2rem;
+}
+.search-wrap .clear-btn {
+  position: absolute;
+  right: .6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .9rem;
+  padding: .1rem .3rem;
+}
+.search-wrap .clear-btn:hover { color: var(--text); }
+
+/* csv bar */
+.csv-bar {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .65rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  margin-bottom: 1.25rem;
+}
+.csv-bar .label {
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--muted);
+  margin-right: .3rem;
+}
+.csv-bar input[type=file] {
+  font-size: .76rem;
+  padding: .25rem .5rem;
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  background: var(--card);
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+
+/* detail panel */
+.detail-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 5px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.25rem;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+}
+.detail-panel .placeholder {
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--muted);
+}
+.detail-content { display: none; width: 100%; }
+.detail-content.active { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.detail-name {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--accent);
+  min-width: 160px;
+}
+.detail-fields { display: flex; gap: 1.5rem; flex-wrap: wrap; flex: 1; }
+.detail-field {
+  font-family: var(--mono);
+  font-size: .8rem;
+}
+.detail-field .field-icon { color: var(--muted); margin-right: .3rem; }
+.detail-date { font-size: .72rem; color: var(--muted); margin-left: auto; }
+
+/* contacts table */
+.contacts-header {
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--muted);
+  padding: .4rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr .9fr auto;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.contact-row {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr .9fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: .65rem 1rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .12s;
+  border-radius: 3px;
+}
+.contact-row:last-child { border-bottom: none; }
+.contact-row:hover { background: var(--panel); }
+.contact-row.selected { background: #ede8fa; border-left: 2px solid var(--accent); padding-left: calc(1rem - 2px); }
+.contact-nom  { font-family: var(--mono); font-size: .88rem; font-weight: 500; color: var(--text); }
+.contact-email{ font-family: var(--mono); font-size: .8rem;  color: var(--muted); }
+.contact-tel  { font-family: var(--mono); font-size: .8rem;  color: var(--text); }
+.contact-actions { display: flex; gap: .4rem; opacity: 0; transition: opacity .12s; }
+.contact-row:hover .contact-actions,
+.contact-row.selected .contact-actions { opacity: 1; }
+
+.contacts-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.contacts-wrap .section-label {
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--muted);
+  padding: .5rem 1rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+}
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  font-family: var(--mono);
+  font-size: .85rem;
+  color: var(--muted);
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">
+    <div class="sub">[ SQLite · Flask ]</div>
+    <h1>address_book</h1>
+    <div class="counter">
+      {% if q %}
+        {{ contacts|length }} / {{ total }} trouvés
+      {% else %}
+        {{ total }} contact{{ 's' if total != 1 else '' }}
+      {% endif %}
+    </div>
+  </div>
+  <a href="{{ url_for('add_contact') }}" class="btn btn-primary">+ nouveau contact</a>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <div class="placeholder" id="detailPlaceholder">← cliquez sur un contact pour voir ses détails</div>
+  <div class="detail-content" id="detailContent">
+    <div class="detail-name" id="detailName"></div>
+    <div class="detail-fields">
+      <div class="detail-field"><span class="field-icon">✉</span><span id="detailEmail"></span></div>
+      <div class="detail-field"><span class="field-icon">☎</span><span id="detailTel"></span></div>
+    </div>
+    <div class="detail-date" id="detailDate"></div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-row">
+  <form method="GET" action="{{ url_for('index') }}" style="flex:1;display:flex;gap:.75rem;" id="searchForm">
+    <div class="search-wrap" style="flex:1">
+      <span class="icon">⌕</span>
+      <input type="text" name="q" value="{{ q }}" placeholder="rechercher par nom, email ou téléphone…" id="searchInput" autocomplete="off" />
+      {% if q %}
+        <button type="button" class="clear-btn" onclick="clearSearch()">✕</button>
+      {% endif %}
+    </div>
+    <button type="submit" class="btn btn-secondary" style="display:none">Rechercher</button>
+  </form>
+</div>
+
+<!-- CSV BAR -->
+<div class="csv-bar">
+  <span class="label">CSV :</span>
+  <a href="{{ url_for('export_csv') }}" class="btn btn-green btn-sm">↓ exporter</a>
+  <form method="POST" action="{{ url_for('import_csv') }}" enctype="multipart/form-data"
+        style="display:flex;align-items:center;gap:.5rem;flex:1;">
+    <input type="file" name="csv_file" accept=".csv" required />
+    <button type="submit" class="btn btn-sm btn-muted">↑ importer</button>
+  </form>
+</div>
+
+<!-- CONTACTS LIST -->
+<div class="contacts-wrap">
+  <div class="section-label">
+    <span>─── contacts ─────────────────────────</span>
+    <a href="{{ url_for('index') }}" style="color:var(--muted);text-decoration:none;" title="Rafraîchir">↺</a>
+  </div>
+
+  {% if contacts %}
+    <div class="contacts-header">
+      <span>nom</span>
+      <span>email</span>
+      <span>téléphone</span>
+      <span>actions</span>
+    </div>
+    {% for c in contacts %}
+      <div class="contact-row"
+           id="row-{{ c.id }}"
+           data-id="{{ c.id }}"
+           data-nom="{{ c.nom }}"
+           data-email="{{ c.email }}"
+           data-tel="{{ c.telephone }}"
+           data-date="{{ c.date_ajout }}"
+           onclick="selectContact(this)">
+        <div class="contact-nom">{{ c.nom }}</div>
+        <div class="contact-email">{{ c.email }}</div>
+        <div class="contact-tel">{{ c.telephone }}</div>
+        <div class="contact-actions" onclick="event.stopPropagation()">
+          <a href="{{ url_for('communicate', contact_id=c.id) }}" class="btn btn-muted btn-sm">✉ contacter</a>
+          <a href="{{ url_for('edit_contact', contact_id=c.id) }}" class="btn btn-muted btn-sm">~ edit</a>
+          <form method="POST" action="{{ url_for('delete_contact', contact_id=c.id) }}"
+                onsubmit="return confirm('Supprimer {{ c.nom }} ?')">
+            <button type="submit" class="btn btn-danger btn-sm">- del</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      {% if q %}
+        Aucun contact trouvé pour « {{ q }} »
+      {% else %}
+        Aucun contact enregistré.<br><br>
+        <a href="{{ url_for('add_contact') }}" class="btn btn-primary">+ ajouter le premier contact</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // Live search
+  let searchTimer;
+  document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      document.getElementById('searchForm').submit();
+    }, 350);
+  });
+
+  function clearSearch() {
+    window.location.href = "{{ url_for('index') }}";
+  }
+
+  // Detail panel
+  let selectedId = null;
+
+  function selectContact(row) {
+    // deselect previous
+    if (selectedId) {
+      const prev = document.getElementById('row-' + selectedId);
+      if (prev) prev.classList.remove('selected');
+    }
+    // toggle off if clicking same
+    if (selectedId === row.dataset.id) {
+      selectedId = null;
+      document.getElementById('detailPlaceholder').style.display = '';
+      document.getElementById('detailContent').classList.remove('active');
+      return;
+    }
+    selectedId = row.dataset.id;
+    row.classList.add('selected');
+    document.getElementById('detailName').textContent  = row.dataset.nom;
+    document.getElementById('detailEmail').textContent = row.dataset.email;
+    document.getElementById('detailTel').textContent   = row.dataset.tel;
+    document.getElementById('detailDate').textContent  = 'ajouté le ' + row.dataset.date;
+    document.getElementById('detailPlaceholder').style.display = 'none';
+    document.getElementById('detailContent').classList.add('active');
+  }
+</script>
+{% endblock %}
